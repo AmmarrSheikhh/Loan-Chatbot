@@ -139,7 +139,7 @@ void startBot(string triggers[], string responses[], int count) {
                 cout << "Bot: " << responses[i] << endl;
                 matched = true;
 
-                // Special case: Home loan
+                // For Home Loans
                 if (input == "H")
                     showHomeLoanPlans();
                 break;
@@ -149,4 +149,5 @@ void startBot(string triggers[], string responses[], int count) {
         if (!matched)
             cout << "Bot: Sorry, I didn't understand that. Try again.\n";
     }
+
 }
