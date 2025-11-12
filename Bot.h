@@ -1,7 +1,17 @@
-﻿#include <iostream>
+#include <iostream>
 #include <fstream>
 #include <string>
+#include <iomanip>
 using namespace std;
+
+// Helper to convert any input to uppercase for case-insensitive matching
+string toUpperCase(string text) {
+    for (int i = 0; text[i] != '\0'; i++) {
+        if (text[i] >= 'a' && text[i] <= 'z')
+            text[i] -= 32;
+    }
+    return text;
+}
 
 void loadResponses(string triggers[], string responses[], int& count) {
     ifstream file("Utterances.txt");
@@ -14,9 +24,7 @@ void loadResponses(string triggers[], string responses[], int& count) {
     string line;
     count = 0;
     while (getline(file, line)) {
-        // Skip empty lines
         if (line.empty()) continue;
-
         int pos = line.find('#');
         if (pos == -1) {
             cout << "Warning: Malformed line in Utterances.txt -> " << line << endl;
@@ -24,8 +32,11 @@ void loadResponses(string triggers[], string responses[], int& count) {
         }
 
         if (count < 100) {
-            triggers[count] = line.substr(0, pos);
-            responses[count] = line.substr(pos + 1);
+            string trigger = line.substr(0, pos);
+            string response = line.substr(pos + 1);
+
+            triggers[count] = toUpperCase(trigger);
+            responses[count] = response;
             count++;
         }
         else {
@@ -33,7 +44,6 @@ void loadResponses(string triggers[], string responses[], int& count) {
             break;
         }
     }
-
     file.close();
 
     if (count == 0)
@@ -52,53 +62,119 @@ void showHomeLoanPlans() {
     bool foundData = false;
     int lineNumber = 0;
 
+    // Arrays to store data temporarily 
+    string areas[50], sizes[50], installments[50], prices[50], downPayments[50];
+    int totalPlans = 0;
+
     cout << "\n---------------- Home Loan Plans ----------------\n";
+    cout << "Options are as follows:\n";
 
     while (getline(file, line)) {
         lineNumber++;
         if (line.empty()) continue;
 
-        if (skipHeader) { // skip first line
+        if (skipHeader) { 
             skipHeader = false;
             continue;
         }
 
         int pos1 = line.find('#');
-        if (pos1 == -1) {
-            cout << "Warning: Line " << lineNumber << " in Home.txt is malformed.\n";
-            continue;
-        }
-
-        string area, size, installments, price, downPayment;
         int pos2 = line.find('#', pos1 + 1);
         int pos3 = line.find('#', pos2 + 1);
         int pos4 = line.find('#', pos3 + 1);
 
-        if (pos4 == -1) {
-            cout << "Warning: Missing data in line " << lineNumber << ".\n";
+        if (pos1 == -1 || pos2 == -1 || pos3 == -1 || pos4 == -1) {
+            cout << "Warning: Line " << lineNumber << " in Home.txt is malformed.\n";
             continue;
         }
 
-        area = line.substr(0, pos1);
-        size = line.substr(pos1 + 1, pos2 - pos1 - 1);
-        installments = line.substr(pos2 + 1, pos3 - pos2 - 1);
-        price = line.substr(pos3 + 1, pos4 - pos3 - 1);
-        downPayment = line.substr(pos4 + 1);
+        if (totalPlans < 50) {
+            areas[totalPlans] = line.substr(0, pos1);
+            sizes[totalPlans] = line.substr(pos1 + 1, pos2 - pos1 - 1);
+            installments[totalPlans] = line.substr(pos2 + 1, pos3 - pos2 - 1);
+            prices[totalPlans] = line.substr(pos3 + 1, pos4 - pos3 - 1);
+            downPayments[totalPlans] = line.substr(pos4 + 1);
 
-        cout << "Area: " << area
-            << " | Size: " << size
-            << " | Installments: " << installments
-            << " | Price: " << price
-            << " | Down Payment: " << downPayment << endl;
+            cout << totalPlans + 1 << ". "
+                << "Area: " << areas[totalPlans]
+                << " | Size: " << sizes[totalPlans]
+                << " | Installments: " << installments[totalPlans]
+                << " | Price: " << prices[totalPlans]
+                << " | Down Payment: " << downPayments[totalPlans]
+                << endl;
 
-        foundData = true;
+            totalPlans++;
+            foundData = true;
+        }
     }
 
     file.close();
 
-    if (!foundData)
+    if (!foundData) {
         cout << "No valid loan plans found in Home.txt.\n";
+        cout << "--------------------------------------------------\n\n";
+        return;
+    }
 
+    cout << "--------------------------------------------------\n";
+
+    // Get user selection
+    string choice;
+    int selected = -1;
+
+    cout << "\nEnter the number of the loan plan you want to select: ";
+    getline(cin, choice);
+
+    // Validate user selection
+    if (choice.length() == 1 && choice[0] >= '1' && choice[0] <= ('0' + totalPlans)) {
+        selected = choice[0] - '1';
+    }
+    else {
+        cout << "Invalid selection. Returning to main chat.\n";
+        cout << "--------------------------------------------------\n\n";
+        return;
+    }
+
+    cout << "\nYou selected Plan #" << (selected + 1) << ":\n";
+    cout << "Area: " << areas[selected]
+        << " | Size: " << sizes[selected]
+        << " | Installments: " << installments[selected]
+        << " | Price: " << prices[selected]
+        << " | Down Payment: " << downPayments[selected] << endl;
+
+    double price = 0, down = 0;
+    int totalInst = 0;
+
+    // Removing commas from prices 
+
+    string p = prices[selected];
+    string d = downPayments[selected];
+    string inst = installments[selected];
+
+    string cleanP = "", cleanD = "", cleanI = "";
+    for (int i = 0; i < p.length(); i++) if (p[i] != ',') cleanP += p[i];
+    for (int i = 0; i < d.length(); i++) if (d[i] != ',') cleanD += d[i];
+    for (int i = 0; i < inst.length(); i++) if (inst[i] != ',') cleanI += inst[i];
+
+    price = stod(cleanP);
+    down = stod(cleanD);
+    totalInst = stoi(cleanI);
+
+    if (totalInst == 0) {
+        cout << "Error: Installments cannot be zero.\n";
+        return;
+    }
+
+    double remaining = price - down;
+    double perMonth = remaining / totalInst;
+    cout<<fixed<<setprecision(0);
+
+    cout << "\nLoan Breakdown:\n";
+    cout << "Total Price: " << price << " PKR\n";
+    cout << "Down Payment: " << down << " PKR\n";
+    cout << "Remaining Amount: " << remaining << " PKR\n";
+    cout << "Installment Plan: " << totalInst << " months\n";
+    cout << "Monthly Payment: " << perMonth << " PKR\n";
     cout << "--------------------------------------------------\n\n";
 }
 
@@ -107,6 +183,15 @@ void startBot(string triggers[], string responses[], int count) {
     if (count == 0) {
         cout << "Bot: Unable to start — no utterances loaded.\n";
         return;
+    }
+
+    // Default response for any out scope input
+    string defaultResponse = "Bot: Sorry, I didn’t understand.";
+    for (int i = 0; i < count; i++) {
+        if (triggers[i] == "*") {
+            defaultResponse = responses[i];
+            break;
+        }
     }
 
     cout << "--------------------------------------\n";
@@ -132,22 +217,26 @@ void startBot(string triggers[], string responses[], int count) {
             break;
         }
 
-        // Search for matching trigger (H,C,P etc)
+        // Convert user input to uppercase for comparison
+        string upperInput = toUpperCase(input);
+
+        // Search for matching trigger 
         bool matched = false;
         for (int i = 0; i < count; i++) {
-            if (input == triggers[i]) {
+            if (upperInput == triggers[i]) {
                 cout << "Bot: " << responses[i] << endl;
                 matched = true;
 
-                // For Home Loans
-                if (input == "H")
+                // Special case: Home loan
+                if (upperInput == "H")
                     showHomeLoanPlans();
                 break;
+                // other special cases to be added later on as the project goes forawrd
             }
         }
-
-        if (!matched)
-            cout << "Bot: Sorry, I didn't understand that. Try again.\n";
+        // if no match found from utterances, print the default response
+        if (!matched) {
+            cout << "Bot: " << defaultResponse << endl;
+        }
     }
-
 }
