@@ -1,0 +1,3 @@
+Make#Model#Distance Per Charge (KM)#Charging Time (Hrs)#Max Speed (KM/H)#Installments#Price#Down Payment
+Make 1#Model PQR#250#3#75#60#250,000#50,000
+Make 1#Model PQR#250#3#75#48#240,000#48,000

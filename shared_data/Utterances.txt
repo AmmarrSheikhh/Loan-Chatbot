@@ -1,0 +1,7 @@
+Hi#Hello! Please press A if you want to apply for a loan. Press X to exit
+Hello#Hi! Please press A if you want to apply for a loan. Press X to exit
+AoA#WaS! Please press A if you want to apply for a loan. Press X to exit
+Salam#Wa alaikum salam! Please press A if you want to apply for a loan. Press X to exit
+*#Hi! I'll be happy to help. Please press A if you want to apply for loan. Press X to exit
+A#Please select the category you want to apply for. Press H for a home loan, C for a car loan, S for a scooter loan, P for a personal loan. Press X to exit
+H#You are applying for a home loan. Please select area. Options are 1, 2, 3, 4

@@ -1,0 +1,4 @@
+Area#Size#Installments#Price#Down Payment
+Area 1#5 Marla#60#10,000,000#1,000,000
+Area 1#5 Marla#48#9,500,000#2,000,000
+Area 1#5 Marla#36#8,500,000#3,000,000

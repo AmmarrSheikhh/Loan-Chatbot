@@ -1,0 +1,4 @@
+Loan Amount#Term (months)#Interest Rate#Monthly Payment#Total Payment
+100,000#12#15%#9,025#108,300
+500,000#24#14%#24,083#578,000
+1,000,000#36#13%#33,763#1,215,468
